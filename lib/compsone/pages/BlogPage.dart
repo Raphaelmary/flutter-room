@@ -5,7 +5,7 @@ import 'package:newapp/compsone/constants/text.dart';
 import 'package:newapp/compsone/pages/RegistrationPage.dart';
 
 import '../widgets/blog_widget.dart';
-// import 'package:myflutterapp/widgets/blog_widget.dart';
+// import 'package:newapp/compsone/widgets/blog_widget.dart';
 
 class BlogPage extends StatefulWidget {
   const BlogPage({

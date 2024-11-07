@@ -96,19 +96,20 @@ class _LoaderState extends State<Loader> {
         isExtended: false,
         onPressed: () {},
         elevation: 0,
-        shape: BeveledRectangleBorder(
-          borderRadius: BorderRadius.circular(15.0),
-          side: const BorderSide(
-            color: Color.fromARGB(255, 0, 2, 92),
-          ),
-        ),
+        backgroundColor: Colors.red,
+        // shape: BeveledRectangleBorder(
+        //   borderRadius: BorderRadius.circular(15.0),
+        //   side: const BorderSide(
+        //     color: Color.fromARGB(255, 0, 2, 92),
+        //   ),
+        // ),
         child: const Icon(Icons.add, size: 20.0),
       ),
       floatingActionButtonLocation:
           FloatingActionButtonLocation.miniStartDocked,
       bottomNavigationBar: const BottomAppBar(
-        color: Color.fromARGB(255, 2, 0, 66),
-        notchMargin: 5.0,
+        color: Color.fromARGB(255, 15, 15, 36),
+        notchMargin: 10.0,
         shape: CircularNotchedRectangle(),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,

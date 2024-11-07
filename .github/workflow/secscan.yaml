@@ -1,0 +1,67 @@
+name: Automated Vulnerability Scan
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 6 * * *" # Run daily at 6 AM UTC
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run Nuclei scan for known vulnerabilities
+        run: |
+          curl -s https://api.github.com/repos/projectdiscovery/nuclei/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")' > version.txt
+          curl -LO "https://github.com/projectdiscovery/nuclei/releases/download/$(cat version.txt)/nuclei-linux-amd64.zip"
+          unzip nuclei-linux-amd64.zip && sudo mv nuclei /usr/local/bin/
+          nuclei -target https://yourtarget.com -severity critical,high -silent -o results.txt
+
+      - name: Run custom vulnerability scripts
+        run: |
+          bash ./scripts/vuln_check.sh
+
+      - name: Run Nmap for open ports
+        run: |
+          sudo apt-get install nmap -y
+          nmap -sV -p 1-65535 -oA nmap_scan_results https://yourtarget.com
+
+      - name: Upload Scan Results
+        uses: actions/upload-artifact@v2
+        with:
+          name: security-reports
+          path: results.txt
+
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: "#security-alerts"
+          SLACK_COLOR: "#00FF00"
+          SLACK_MESSAGE: "New vulnerabilities found in the latest scan!"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Jira Notification
+        run: |
+          curl -X POST -H "Authorization: Basic ${{ secrets.JIRA_AUTH }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+                "fields": {
+                  "project": {
+                    "key": "'"${{ secrets.JIRA_PROJECT_KEY }}"'"
+                  },
+                  "summary": "Automated Vulnerability Scan Report",
+                  "description": "New vulnerabilities detected in the recent scan. Refer to the attached report.",
+                  "issuetype": {
+                    "name": "Task"
+                  }
+                }
+              }' \
+          https://your-jira-domain.atlassian.net/rest/api/3/issue/
+        env:
+          JIRA_AUTH: ${{ secrets.JIRA_AUTH }}
+          JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
