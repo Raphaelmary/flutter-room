@@ -1,15 +1,10 @@
 import 'package:flexify/flexify.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:newapp/components/Loader.dart';
-import 'package:newapp/components/SplashScreen.dart';
-import 'package:newapp/formproject/submitform.dart';
-import 'package:newapp/pages/HomePage.dart';
-import 'package:newapp/firstform/DetailsForm.dart';
 import 'package:newapp/ralf/Home.dart';
 import 'package:newapp/submitform/inputForm.dart';
 import 'package:newapp/submitform/inputdetails.dart';
-import 'package:newapp/variables/overview.dart';
+import 'package:newapp/ralf/variables/overview.dart';
 import 'flutter-room/root.dart';
 
 void main() {
@@ -30,10 +25,10 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
-          fontFamily: 'Tahoma',
+          fontFamily: 'Trap',
         ),
         themeMode: ThemeMode.system,
-        home: const OverviewPage(screensize: Size(20, 20)),
+        home: const Home(),
       ),
     );
   }
