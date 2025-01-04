@@ -1,3 +1,41 @@
+# name: SonarQube Scan for Flutter
+
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     types:
+#       - opened
+#       - synchronize
+#       - reopened
+#   workflow_dispatch:
+
+# jobs:
+#   sonarqube:
+#     name: SonarQube Scan
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       # Checkout the repository
+#       - name: Checkout Code
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0  # Ensures full history is fetched for accurate analysis
+
+#       # Build the Flutter project to ensure dependencies are retrieved and the code is compiled
+#       - name: Build Flutter Project
+#         run: |
+#           flutter pub get
+#           flutter build apk --debug
+
+#       # Run SonarQube analysis
+#       - name: Run SonarQube Scan
+#         uses: SonarSource/sonarqube-scan-action@v4
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Required for PR context
+#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
 name: SonarQube Scan for Flutter
 
 on:
@@ -23,7 +61,13 @@ jobs:
         with:
           fetch-depth: 0  # Ensures full history is fetched for accurate analysis
 
-      # Build the Flutter project to ensure dependencies are retrieved and the code is compiled
+      # Set up Flutter environment
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: stable  # Use the stable version of Flutter
+
+      # Ensure Flutter dependencies are retrieved and the project is built
       - name: Build Flutter Project
         run: |
           flutter pub get
