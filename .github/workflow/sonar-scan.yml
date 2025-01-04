@@ -1,24 +1,61 @@
-name: Build
+# name: Build
+# on:
+#   push:
+#   workflow_dispatch:
+#     branches:
+#       - main
+#   pull_request:
+#     types: [opened, synchronize, reopened]
+# jobs:
+#   sonarqube:
+#     name: SonarQube
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+#       # The analysis requires to retrieve dependencies and build successfully
+#       - name: Build
+#         run: <commands_to_build_your_project>
+#       - name: SonarQube Scan
+#         uses: SonarSource/sonarqube-scan-action@v4
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+name: SonarQube Scan for Flutter
+
 on:
   push:
-  workflow_dispatch:
     branches:
       - main
   pull_request:
-    types: [opened, synchronize, reopened]
+    types:
+      - opened
+      - synchronize
+      - reopened
+  workflow_dispatch:
+
 jobs:
   sonarqube:
-    name: SonarQube
+    name: SonarQube Scan
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      # Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      # The analysis requires to retrieve dependencies and build successfully
-      - name: Build
-        run: <commands_to_build_your_project>
-      - name: SonarQube Scan
+          fetch-depth: 0  # Ensures full history is fetched for accurate analysis
+
+      # Build the Flutter project to ensure dependencies are retrieved and the code is compiled
+      - name: Build Flutter Project
+        run: |
+          flutter pub get
+          flutter build apk --debug
+
+      # Run SonarQube analysis
+      - name: Run SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v4
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Required for PR context
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
