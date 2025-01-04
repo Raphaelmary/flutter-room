@@ -125,8 +125,72 @@
 #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-#PART V
-name: SonarQube Scan for Flutter
+#PART V - GOOD FILE EXCEPT FOR KOTLIN ERROR
+# name: SonarQube Scan for Flutter
+
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     types:
+#       - opened
+#       - synchronize
+#       - reopened
+#   workflow_dispatch:
+
+# jobs:
+#   sonarqube:
+#     name: SonarQube Scan
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       # Checkout the repository
+#       - name: Checkout Code
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0  # Ensures full history is fetched for accurate analysis
+
+#       # Set up Flutter environment
+#       - name: Set up Flutter
+#         uses: subosito/flutter-action@v2
+#         with:
+#           flutter-version: '3.27.1'  # Ensure compatibility with Dart >=3.2.3
+
+#       # Disable Flutter analytics
+#       - name: Disable Flutter Analytics
+#         run: flutter config --no-analytics
+
+#       # Clean previous builds
+#       - name: Clean Flutter Build
+#         run: flutter clean
+
+#       # Increase Gradle memory
+#       - name: Increase Gradle Memory
+#         run: |
+#           echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxPermSize=512m" >> android/gradle.properties
+
+#       # Install dependencies
+#       - name: Install Dependencies
+#         run: flutter pub get
+
+#       # Verify dependencies
+#       - name: Verify Flutter Dependencies
+#         run: flutter pub outdated
+
+#       # Build the Flutter project with verbose output
+#       - name: Build Flutter Project
+#         run: flutter build apk --debug --verbose
+
+#       # Run SonarQube analysis
+#       - name: Run SonarQube Scan
+#         uses: SonarSource/sonarqube-scan-action@v4
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+#PART VI - FIX FOR KOTLIN ERROR
+name: Flutter Build and SonarQube Scan
 
 on:
   push:
@@ -141,7 +205,7 @@ on:
 
 jobs:
   sonarqube:
-    name: SonarQube Scan
+    name: Flutter Build and SonarQube
     runs-on: ubuntu-latest
 
     steps:
@@ -149,41 +213,46 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Ensures full history is fetched for accurate analysis
+          fetch-depth: 0
 
       # Set up Flutter environment
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.1'  # Ensure compatibility with Dart >=3.2.3
+          flutter-version: '3.27.1'
 
       # Disable Flutter analytics
       - name: Disable Flutter Analytics
         run: flutter config --no-analytics
 
-      # Clean previous builds
-      - name: Clean Flutter Build
+      # Clean the build to ensure no residual issues
+      - name: Clean Build
         run: flutter clean
 
-      # Increase Gradle memory
-      - name: Increase Gradle Memory
+      # Upgrade Dart and Flutter dependencies
+      - name: Upgrade Dependencies
+        run: flutter pub upgrade --major-versions
+
+      # Set Gradle memory and enable Kotlin compile avoidance
+      - name: Configure Gradle Settings
         run: |
-          echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxPermSize=512m" >> android/gradle.properties
+          echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxPermSize=512m -Dkotlin.incremental.useClasspathSnapshot=false" >> android/gradle.properties
+          echo "org.gradle.daemon=true" >> android/gradle.properties
 
       # Install dependencies
-      - name: Install Dependencies
+      - name: Install Flutter Dependencies
         run: flutter pub get
 
       # Verify dependencies
-      - name: Verify Flutter Dependencies
+      - name: Verify Dependencies
         run: flutter pub outdated
 
-      # Build the Flutter project with verbose output
-      - name: Build Flutter Project
+      # Build Flutter debug APK
+      - name: Build Debug APK
         run: flutter build apk --debug --verbose
 
       # Run SonarQube analysis
-      - name: Run SonarQube Scan
+      - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
