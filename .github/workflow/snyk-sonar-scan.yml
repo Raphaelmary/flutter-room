@@ -1,77 +1,77 @@
-name: Flutter Vulnerability Scan
+# name: Flutter Vulnerability Scan
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-  schedule:
-    - cron: "0 6 * * *" # Run daily at 6 AM UTC
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     branches:
+#       - main
+#   schedule:
+#     - cron: "0 6 * * *" # Run daily at 6 AM UTC
 
-jobs:
-  vulnerability_scan:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+# jobs:
+#   vulnerability_scan:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "stable"
+#       - name: Set up Flutter
+#         uses: subosito/flutter-action@v2
+#         with:
+#           flutter-version: "stable"
 
-      - name: Install dependencies
-        run: flutter pub get
+#       - name: Install dependencies
+#         run: flutter pub get
 
-      - name: Snyk vulnerability scan
-        uses: snyk/actions/setup@v2
-        with:
-          token: ${{ secrets.SNYK_TOKEN }}
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk monitor --all-projects
+#       - name: Snyk vulnerability scan
+#         uses: snyk/actions/setup@v2
+#         with:
+#           token: ${{ secrets.SNYK_TOKEN }}
+#         env:
+#           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+#         run: snyk monitor --all-projects
 
-      - name: SonarQube scan
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: |
-          sonar-scanner \
-          -Dsonar.projectKey=flutter_project \
-          -Dsonar.sources=. \
-          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+#       - name: SonarQube scan
+#         env:
+#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+#         run: |
+#           sonar-scanner \
+#           -Dsonar.projectKey=flutter_project \
+#           -Dsonar.sources=. \
+#           -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+#           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-      - name: Slack Notification
-        if: failure()
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_CHANNEL: "#security-alerts"
-          SLACK_COLOR: "#FF0000"
-          SLACK_MESSAGE: "Snyk or SonarQube scan found vulnerabilities in the latest scan!"
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+#       - name: Slack Notification
+#         if: failure()
+#         uses: rtCamp/action-slack-notify@v2
+#         env:
+#           SLACK_CHANNEL: "#security-alerts"
+#           SLACK_COLOR: "#FF0000"
+#           SLACK_MESSAGE: "Snyk or SonarQube scan found vulnerabilities in the latest scan!"
+#           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
-      - name: Jira Notification
-        if: failure()
-        run: |
-          curl -X POST -H "Authorization: Basic ${{ secrets.JIRA_AUTH }}" \
-          -H "Content-Type: application/json" \
-          -d '{
-                "fields": {
-                  "project": {
-                    "key": "'"${{ secrets.JIRA_PROJECT_KEY }}"'"
-                  },
-                  "summary": "Vulnerabilities found in Flutter Project",
-                  "description": "Refer to Snyk and SonarQube scan results for details.",
-                  "issuetype": {
-                    "name": "Task"
-                  }
-                }
-              }' \
-          ${{ secrets.JIRA_HOST_URL }}/rest/api/3/issue/
-        env:
-          JIRA_AUTH: ${{ secrets.JIRA_AUTH }}
-          JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
-          JIRA_HOST_URL: ${{ secrets.JIRA_HOST_URL }}
+#       - name: Jira Notification
+#         if: failure()
+#         run: |
+#           curl -X POST -H "Authorization: Basic ${{ secrets.JIRA_AUTH }}" \
+#           -H "Content-Type: application/json" \
+#           -d '{
+#                 "fields": {
+#                   "project": {
+#                     "key": "'"${{ secrets.JIRA_PROJECT_KEY }}"'"
+#                   },
+#                   "summary": "Vulnerabilities found in Flutter Project",
+#                   "description": "Refer to Snyk and SonarQube scan results for details.",
+#                   "issuetype": {
+#                     "name": "Task"
+#                   }
+#                 }
+#               }' \
+#           ${{ secrets.JIRA_HOST_URL }}/rest/api/3/issue/
+#         env:
+#           JIRA_AUTH: ${{ secrets.JIRA_AUTH }}
+#           JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
+#           JIRA_HOST_URL: ${{ secrets.JIRA_HOST_URL }}
