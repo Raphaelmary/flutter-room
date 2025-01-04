@@ -36,6 +36,65 @@
 #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Required for PR context
 #           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+
+#PART II
+# name: SonarQube Scan for Flutter
+
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     types:
+#       - opened
+#       - synchronize
+#       - reopened
+#   workflow_dispatch:
+
+# jobs:
+#   sonarqube:
+#     name: SonarQube Scan
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       # Checkout the repository
+#       - name: Checkout Code
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0  # Ensures full history is fetched for accurate analysis
+
+#       # Set up Flutter environment
+#       - name: Set up Flutter
+#         uses: subosito/flutter-action@v2
+#         with:
+#           flutter-version: '3.13.0'  # Use the stable version of Flutter
+          
+#       # Disable Flutter analytics to avoid first-run prompts
+#       - name: Disable Flutter Analytics
+#         run: flutter config --no-analytics
+        
+#       # Retrieve Flutter dependencies
+#       - name: Install Dependencies
+#         run: flutter pub get
+
+#       # Build the Flutter project
+#       - name: Build Flutter Project
+#         run: flutter build apk --debug
+
+#       # Ensure Flutter dependencies are retrieved and the project is built
+#       # - name: Build Flutter Project
+#       #   run: |
+#       #     flutter pub get
+#       #     flutter build apk --debug
+
+#       # Run SonarQube analysis
+#       - name: Run SonarQube Scan
+#         uses: SonarSource/sonarqube-scan-action@v4
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Required for PR context
+#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+#PART III
 name: SonarQube Scan for Flutter
 
 on:
@@ -61,16 +120,22 @@ jobs:
         with:
           fetch-depth: 0  # Ensures full history is fetched for accurate analysis
 
-      # Set up Flutter environment
+      # Set up Flutter environment with a compatible version
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.13.0'  # Use the stable version of Flutter
-          
+          flutter-version: '3.16.0'  # Update to a version with Dart >=3.2.3
+
       # Disable Flutter analytics to avoid first-run prompts
       - name: Disable Flutter Analytics
         run: flutter config --no-analytics
-        
+
+      # Verify Flutter and Dart versions
+      - name: Check Flutter and Dart Versions
+        run: |
+          flutter --version
+          dart --version
+
       # Retrieve Flutter dependencies
       - name: Install Dependencies
         run: flutter pub get
@@ -78,12 +143,6 @@ jobs:
       # Build the Flutter project
       - name: Build Flutter Project
         run: flutter build apk --debug
-
-      # Ensure Flutter dependencies are retrieved and the project is built
-      # - name: Build Flutter Project
-      #   run: |
-      #     flutter pub get
-      #     flutter build apk --debug
 
       # Run SonarQube analysis
       - name: Run SonarQube Scan
