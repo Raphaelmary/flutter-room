@@ -66,12 +66,19 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.13.0'  # Use the stable version of Flutter
+      # Retrieve Flutter dependencies
+      - name: Install Dependencies
+        run: flutter pub get
+
+      # Build the Flutter project
+      - name: Build Flutter Project
+        run: flutter build apk --debug
 
       # Ensure Flutter dependencies are retrieved and the project is built
-      - name: Build Flutter Project
-        run: |
-          flutter pub get
-          flutter build apk --debug
+      # - name: Build Flutter Project
+      #   run: |
+      #     flutter pub get
+      #     flutter build apk --debug
 
       # Run SonarQube analysis
       - name: Run SonarQube Scan
