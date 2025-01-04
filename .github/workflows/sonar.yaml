@@ -55,7 +55,77 @@
 #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Required for PR context
 #           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-#PART IV
+#PART IV - works good with little error
+# name: SonarQube Scan for Flutter
+
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     types:
+#       - opened
+#       - synchronize
+#       - reopened
+#   workflow_dispatch:
+
+# jobs:
+#   sonarqube:
+#     name: SonarQube Scan
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       # Checkout the repository
+#       - name: Checkout Code
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
+
+#       # Set up Flutter environment
+#       - name: Set up Flutter
+#         uses: subosito/flutter-action@v2
+#         with:
+#           flutter-version: '3.27.1'
+
+#       # Disable Flutter analytics
+#       - name: Disable Flutter Analytics
+#         run: flutter config --no-analytics
+
+#       # Verify Flutter and Dart versions
+#       - name: Check Flutter and Dart Versions
+#         run: |
+#           flutter --version
+#           dart --version
+
+#       # Clean previous builds
+#       - name: Clean Flutter Build
+#         run: flutter clean
+
+#       # Increase Gradle memory
+#       - name: Increase Gradle Memory
+#         run: |
+#           echo "org.gradle.jvmargs=-Xmx4096m" >> android/gradle.properties
+
+#       # Install dependencies
+#       - name: Install Dependencies
+#         run: flutter pub get
+
+#       # Verify dependencies
+#       - name: Verify Flutter Dependencies
+#         run: flutter pub outdated
+
+#       # Build the Flutter project with verbose output
+#       - name: Build Flutter Project
+#         run: flutter build apk --debug --verbose
+
+#       # Run SonarQube analysis
+#       - name: Run SonarQube Scan
+#         uses: SonarSource/sonarqube-scan-action@v4
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+#PART V
 name: SonarQube Scan for Flutter
 
 on:
@@ -79,23 +149,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Ensures full history is fetched for accurate analysis
 
       # Set up Flutter environment
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.1'
+          flutter-version: '3.27.1'  # Ensure compatibility with Dart >=3.2.3
 
       # Disable Flutter analytics
       - name: Disable Flutter Analytics
         run: flutter config --no-analytics
-
-      # Verify Flutter and Dart versions
-      - name: Check Flutter and Dart Versions
-        run: |
-          flutter --version
-          dart --version
 
       # Clean previous builds
       - name: Clean Flutter Build
@@ -104,7 +168,7 @@ jobs:
       # Increase Gradle memory
       - name: Increase Gradle Memory
         run: |
-          echo "org.gradle.jvmargs=-Xmx4096m" >> android/gradle.properties
+          echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxPermSize=512m" >> android/gradle.properties
 
       # Install dependencies
       - name: Install Dependencies
@@ -124,4 +188,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
